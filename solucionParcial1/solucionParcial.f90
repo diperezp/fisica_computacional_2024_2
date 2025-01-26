@@ -51,9 +51,13 @@ program SolucionParcial
     !-------------------------------------
     !implimentamos la subrutina mat_mod
     call mat_mod(mat1,mat_modulo,row,column)
+
     do i=1,row
         print *,(mat_modulo(i,j), j=1,column)
     end do
+    !-------------------------------------
+
+    !-------------------------------------
 
 
 
@@ -67,7 +71,7 @@ end program SolucionParcial
 subroutine mat_sum(mat1, mat2, result, row, column)
     integer::row,column
     complex, dimension(row, column), intent(in) :: mat1, mat2
-    real, dimension(row, column), intent(out) :: result
+    complex, dimension(row, column), intent(out) :: result
 
     ! Iteradores
     integer :: i, j
