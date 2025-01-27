@@ -1,11 +1,11 @@
 program Fixed_Point
 
     !Definicion de las estructura de datos que se van a utilizar en el programa
-    real::x=0.5       !inicio del programa
+    real::x=2.95     !inicio del programa
     real::y         !almacena el valor de la funcion
     integer::i,j    !iteradores
     real::e=1e-6    !error 
-    integer::n=10 !numero de iteraciones
+    integer::n=1000 !numero de iteraciones
     real::root      !raiz de la funcion
 
     do i=1,n
@@ -15,12 +15,14 @@ program Fixed_Point
         print*,"**"
         !evaluamos el valor
         if(e>abs(x-y)) then
-            root=y
+            x=y
             print *, "Iteraciones del programa:",i
             exit   !detenemos el bucle
         end if
         x=y
     end do
+
+    root=x
 
     print *, "La raiz de la ecuacion es", root
 
@@ -30,5 +32,5 @@ function expresion(x) RESULT(resultado)
     !declaracion de la variables
     real::x            !argumento de la funcion
     real::resultado    !valor que devuelve la funcion
-    resultado=log(x)        !expresion matematica
+    resultado=x**2-6*x+8        !expresion matematica
 end function expresion
