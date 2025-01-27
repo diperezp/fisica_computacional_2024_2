@@ -63,7 +63,7 @@ End Program Bisection
 
 function expresion(x) RESULT(resultado)
     !declaracion de la variables
-    real::x            !argumento de la funcion
-    real::resultado    !valor que devuelve la funcion
+    real::x                         !argumento de la funcion
+    real::resultado                 !valor que devuelve la funcion
     resultado=(x**2)-(6*x)+8        !expresion matematica
 end function expresion
