@@ -16,13 +16,13 @@ program solucionParcial
     call secante(a, b, e, n, root)
 
     !Imprimir la raiz
-    print *, "La raiz es: ", root
+    print *, "La raiz es: ", root, "Ohmios"
 
     !Llamado a la funcion regula_falsi
     call regula_falsi(a_regula, b, e, n, root)
 
     !Imprimir la raiz
-    print *, "La raiz es: ", root
+    print *, "La raiz es: ", root, "Ohmios"
 
 
 end program solucionParcial
