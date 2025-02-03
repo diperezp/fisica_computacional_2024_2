@@ -30,7 +30,7 @@ program sistema_lineal_gauss_jordan
         write(*,*) 'La solucion del sistema es: '
         do i=1,n
             write(*,1)i,x(i)
-        1   format(1x,"x(",I2,")",f8.3)
+        1   format(1x,"x(",I2,")=",f8.3)
         end do
     else
         write(*,*) 'El sistema es cercanamente singular'
@@ -75,11 +75,9 @@ subroutine gauss_jordan(lin,limrow,limcol,n,x,singul)
                 lin(i,j)=lin(pivrow,j)
                 lin(pivrow,j)=temp
             end do
-        else
-            !divide la fila i por el pivote
-            lin(i,i:n+1)=lin(i,i:n+1)/lin(i,i)
         end if
-
+        !divide la fila i por el pivote
+        lin(i,i:n+1)=lin(i,i:n+1)/lin(i,i)
         
         !elimina la variable i-esima de las ecuaciones restantes i+1,...,n
         do j=i+1,n

@@ -81,7 +81,7 @@ do while(.not. done)
     WRITE(*,*) 'ITERACIONES #: ',n
     do i=1,numeqn
         write(*,1) "x(",i,")=",xnew(i)
-    1   format(1x,a2,I3,a6,f8.4)
+    1   format(a2,I3,1x,a2,1x,f8.4)
     end do
 
     !copia xnew en xold 
