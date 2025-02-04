@@ -83,6 +83,7 @@ do while(.not. done)
     write(*,*)
     WRITE(*,*) 'ITERACIONES #: ',n
     do i=1,numeqn
+        write(*,*)xnew(i)
         write(*,1) "x(",i,")=",xnew(i)
     1   format(1x,a2,I3,a6,f8.4)
     end do
