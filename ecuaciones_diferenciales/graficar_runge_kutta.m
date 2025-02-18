@@ -1,5 +1,5 @@
-datos=load('car.dat');
-datos1=load('des.dat');
+datos=load('carga_runge_kutta.dat');
+datos1=load('descarga_runge_kutta.dat');
 
 % Extraer columnas
 abscisa1=datos1(:,1);
@@ -13,11 +13,11 @@ ordenada2=datos(:,3);
 
 
 % Graficar
-plot(abscisa, ordenada1, 'bo');
+plot(abscisa, ordenada1, 'bs');
 hold on;
 plot(abscisa,ordenada2,'r')
 hold on;
-plot(abscisa1,ordenada11,'go')
+plot(abscisa1,ordenada11,'gs')
 hold on;
 plot(abscisa1,ordenada21,'m')
 xlabel('Eje X');
@@ -28,4 +28,4 @@ grid on;
 legend('solucion aproximada de carga','solucion exacta de carga','solucion aproximada de descarga','solucion exacta de descarga');
 
 % Opcional: Guardar la gráfica
-print -dpng grafico.png;
+print -dpng grafico_runge_kutta.png;
