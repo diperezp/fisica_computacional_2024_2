@@ -153,7 +153,7 @@ contains
         close(unit=5)
     end function regresion_lineal
 
-    subroutine shootingmethodlineal(dataset,fun,gun,Xa,h)
+    subroutine shootingmethodnolineal(dataset,fun,gun,Xa,h)
         implicit none
         character(len=*),intent(in)::dataset   !archivo donde se almacenara los resultados de la solucion de la ecuacion diferencial
         real,intent(in)::Xa(:,:)               !valores de frontera
