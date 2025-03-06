@@ -9,10 +9,11 @@ program main
     character(len=100)::dataset='solucion.dat'
     real::res
     real,dimension(2,2)::Xa
+    real::epsil=1e-6
     Xa=reshape([0.0,PI/2,0.0,1.0],[2,2])
 
 
-    call shootingmethodlineal(dataset,f,g,Xa,h)
+    call shootingmethodnolineal(dataset,f,Xa,h,epsil)
 
 contains
     function f(x) result(res)
@@ -24,16 +25,6 @@ contains
         res(2)=x(3)
         res(3)=-25*x(2)
     end function f
-
-    function g(x) result(res)
-        implicit none
-        real, intent(in)::x(:)
-        real::res(size(x))
-
-        res(1)=1
-        res(2)=x(3)
-        res(3)=-25*x(2)
-    end function g
 
     function F1(x,h,fun) result(res)
         implicit none
@@ -153,21 +144,55 @@ contains
         close(unit=5)
     end function regresion_lineal
 
-    subroutine shootingmethodnolineal(dataset,fun,gun,Xa,h)
+    subroutine solucion_runge_kutta_4(dataset,nx,X0,h,fun)
+        implicit none
+        character(len=*),intent(in)::dataset            !nombre del archvio donde se almacenara los datos
+        integer,intent(in)::nx                          !numero de iteraciones 
+        real,intent(in)::h                              !paso de la solucion de la ecuacion
+        real,intent(in)::X0(:)                          !condiciones iniciales
+        real::x1(size(X0))                              !evaluacion
+        integer::i                                      !iterador
+        real::y_sol(size(X0))
+
+        
+        interface
+            function fun(x) result(y)
+                real, intent(in)::x(:)
+                real:: y(size(x))
+            end function fun
+        end interface
+
+        x1=X0
+        open(1,file=dataset)
+            do i=1,nx
+                call runge_kutta_4(x1,h,fun,y_sol)
+                x1=y_sol
+                write(1,*)x1
+            end do
+            rewind(1)
+        close(1)
+    end subroutine
+
+    subroutine shootingmethodnolineal(dataset,fun,Xa,h,epsil)
         implicit none
         character(len=*),intent(in)::dataset   !archivo donde se almacenara los resultados de la solucion de la ecuacion diferencial
         real,intent(in)::Xa(:,:)               !valores de frontera
         real,intent(in)::h                     !paso con el que se desea resolver la ecuacion diferencial
-        integer::i,nx                             !iteradores y numero de iteraciones
+        real,intent(in)::epsil                 !tolerancia en la solucion de la ecuacion
+        integer::i,nx                          !iteradores y numero de iteraciones
         real::X01(size(Xa(1,:))+1)             !condiciones iniciales para PVI1
         real::X02(size(Xa(1,:))+1)             !condiciones iniciales para PVI2
         real::y_sol(size(Xa(1,:))+1)           !variable temporal
-        real::y_sol_temp(size(Xa(1,:))+1)           !variable temporal
+        real::y_sol_temp(size(Xa(1,:))+1)      !variable temporal
         real::temp                             !variable temporal
-        real::temp1
+        real::shoot
+        real::shoot0                           !angulo de tiro inicial
+        real::shoot1                           !angulo de tiro secundario
+        real::sol_shoot0                       !evaluacion del tiro inicial
+        real::sol_shoot1                       !evaluacion del tiro secundario
+        integer::n=100                         !numero de iteraciones que se van a aplicar en el metodo de la secante
         integer::estado1,estado2,estado3
-        character(len=100)::PVI1='shotingmethodD1.dat'
-        character(len=100)::PVI2='shotingmethodD2.dat'
+        character(len=100)::PVI1='shotingmethodnolinealD1.dat'
 
 
                 
@@ -177,15 +202,8 @@ contains
                 real, intent(in)::x(:)
                 real:: y(size(x))
             end function fun
-
-            function gun(x) result(y)
-                real, intent(in)::x(:)
-                real:: y(size(x))
-            end function gun
         end interface
-        !establecemos la condiciones inciales para cada PVI
-        X01=[Xa(1,1),Xa(1,2),0.0]
-        X02=[Xa(1,1),0.0,1.0]
+
         !establecemos el numero de iteraciones
         nx=INT((Xa(2,1)-Xa(1,1))/h)
         ! Evaluar si nx es par y si no sumarle 1
@@ -193,50 +211,45 @@ contains
             nx = nx + 1
         end if
 
-        !resolvemos los sistemas de ecuaciones diferenciales PVI
-        !almacenados en documento separados
-        open(1,file=PVI1)
-            do i=1,nx
-                call runge_kutta_4(X01,h,fun,y_sol)
-                X01=y_sol
-                write(1,*) X01
-            end do
-            rewind(1)
-        close(1)
+        !establecemos el primer angulo de tiro
+        shoot0=(Xa(2,2)-Xa(1,2))/(Xa(2,1)-Xa(1,1))
+        shoot1=2*shoot0
 
-        open(2,file=PVI2)
-            do i=1,nx
-                call runge_kutta_4(X02,h,gun,y_sol)
-                X02=y_sol
-                write(2,*) X02
-            end do
-            rewind(2)
-        close(2)
-        temp=(Xa(2,2)-regresion_lineal(PVI1,Xa(2,1),nx))/regresion_lineal(PVI2,Xa(2,1),nx)
-        print*,temp
-        print*,Xa(2,2)
-        temp1=regresion_lineal(PVI2,Xa(2,1),nx)
-        print*,1/temp1
+        !asignamos los valores iniciales de las ecuaciones diferenciales
+        X01=[Xa(1,1),Xa(1,2),shoot0]
+        X02=[Xa(1,1),Xa(1,2),shoot1]
 
-        open(7,file=PVI1,iostat=estado1)
-        open(8,file=PVI2,iostat=estado2)
-        open(9,file=dataset,iostat=estado3)
+        !resolvemos la ecuacion diferencial
+        call solucion_runge_kutta_4(PVI1,nx,X01,h,fun)
+        !evaluamos la ecuacion diferencial en b
+        sol_shoot0=regresion_lineal(PVI1,Xa(2,1),nx)-Xa(2,2)
+        !resolvemos la ecuacion diferencial
+        call solucion_runge_kutta_4(PVI1,nx,X02,h,fun)
+        !evaluamos la ecuacion diferencial en b
+        sol_shoot1=regresion_lineal(PVI1,Xa(2,1),nx)-Xa(2,2)
 
-        do i=1,nx
-            if(estado1/=0 .or. estado2/=0 .or. estado3/=0) then
+        !aplicamos el metodo de la secante
+        do i=1,n
+            shoot=shoot0-((shoot0-shoot1)/(sol_shoot0-sol_shoot1))*sol_shoot0
+
+            !evaluamos el error 
+            if(abs(regresion_lineal(PVI1,Xa(2,1),nx)-Xa(2,2))<epsil) then
                 exit
             end if
-            read(7,*)y_sol_temp(1),y_sol_temp(2),y_sol_temp(3)
-            read(8,*)y_sol
-            write(9,*)y_sol(1),y_sol_temp(2:)+temp*y_sol(2:)
+            shoot0=shoot1
+            shoot1=shoot
+            sol_shoot0=sol_shoot1
+            !resolvemos la ecuacion para el numero angulo de tiro
+            X02=[Xa(1,1),Xa(1,2),shoot1]
+            !resolvemos la ecuacion diferencial
+            call solucion_runge_kutta_4(PVI1,nx,X02,h,fun)
+            !evaluamos la ecuacion diferencial en b
+            sol_shoot1=regresion_lineal(PVI1,Xa(2,1),nx)-Xa(2,2)
         end do
 
-
-        close(7)
-        close(8)
-        close(9)
-
-
-    end subroutine shootingmethodlineal
+        !resolvemos la ecuacion para el angulo de tiro con menor error
+        X02=[Xa(1,1),Xa(1,2),shoot]
+        call solucion_runge_kutta_4(dataset,nx,X02,h,fun)
+    end subroutine shootingmethodnolineal
 
 end program main

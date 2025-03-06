@@ -22,7 +22,7 @@ program  secante
             print *, "Iteraciones del programa",i
             exit
         end if
-
+        print*,"*****"
         a=b
         b=root
     end do
