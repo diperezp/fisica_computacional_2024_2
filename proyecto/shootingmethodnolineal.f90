@@ -23,7 +23,7 @@ contains
 
         res(1)=1
         res(2)=x(3)
-        res(3)=-25*x(2)
+        res(3)=-50*x(2)
     end function f
 
     function F1(x,h,fun) result(res)
